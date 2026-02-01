@@ -22,10 +22,49 @@
     </div>
 
     <script>
-        function saveLog() {
-            const name = document.getElementById('beanName').value;
-            alert("Saved: " + name + "! (Next step: adding a real list)");
-        }
+        
+    // 1. Load existing logs from memory when the page opens
+    window.onload = function() {
+        displayLogs();
+    };
+
+    function saveLog() {
+        const name = document.getElementById('beanName').value;
+        const method = document.getElementById('method').value;
+        const rating = document.getElementById('rating').value;
+
+        if(!name || !rating) return alert("Please fill in all fields");
+
+        const newLog = { name, method, rating, date: new Date().toLocaleDateString() };
+
+        // 2. Get existing logs from LocalStorage, add new one, and save back
+        const logs = JSON.parse(localStorage.getItem('coffeeLogs')) || [];
+        logs.push(newLog);
+        localStorage.setItem('coffeeLogs', JSON.stringify(logs));
+
+        // 3. Update the UI and clear inputs
+        displayLogs();
+        document.getElementById('beanName').value = '';
+        document.getElementById('rating').value = '';
+    }
+
+    function displayLogs() {
+        const list = document.getElementById('logList');
+        const logs = JSON.parse(localStorage.getItem('coffeeLogs')) || [];
+        
+        // Clear current list and rebuild it from saved data
+        list.innerHTML = ''; 
+        logs.reverse().forEach(log => {
+            const item = document.createElement('div');
+            item.className = 'log-item';
+            item.innerHTML = `
+                <span><strong>${log.name}</strong> (${log.method}) <br><small>${log.date}</small></span> 
+                <span class="rating">${'★'.repeat(log.rating)}</span>
+            `;
+            list.appendChild(item);
+        });
+    }
+
     </script>
 </body>
 </html>
