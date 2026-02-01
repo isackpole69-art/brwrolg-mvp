@@ -5,154 +5,24 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BrewLog Pro MVP</title>
     <style>
-        body { font-family: sans-serif; padding: 20px; background: #f4f1ea; color: #333; }
+        :root {
+            --bg-color: #f4f1ea;
+            --card-bg: #ffffff;
+            --text-color: #333333;
+            --accent-color: #6f4e37;
+            --secondary-text: #666666;
+            --border-color: #eeeeee;
+        }
+
+        [data-theme="dark"] {
+            --bg-color: #1a1a1a;
+            --card-bg: #2d2d2d;
+            --text-color: #e0e0e0;
+            --accent-color: #d2a679;
+            --secondary-text: #aaaaaa;
+            --border-color: #444444;
+        }
+
+        body { font-family: sans-serif; padding: 20px; background: var(--bg-color); color: var(--text-color); transition: 0.3s; }
         .container { max-width: 400px; margin: auto; }
-        .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-bottom: 20px; }
-        input, select, button { display: block; width: 100%; margin: 10px 0; padding: 10px; box-sizing: border-box; }
-        button { background: #6f4e37; color: white; border: none; cursor: pointer; border-radius: 4px; font-weight: bold; }
-        button:hover { background: #5a3e2b; }
-        
-        #timer-display { font-size: 48px; font-weight: bold; text-align: center; margin: 10px 0; font-family: monospace; color: #6f4e37; }
-        .timer-controls { display: flex; gap: 10px; }
-        .timer-controls button { flex: 1; }
-        .reset-btn { background: #95a5a6; }
-
-        .log-item { background: #fff; padding: 10px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; }
-        .rating { color: #d4a017; font-weight: bold; }
-        .delete-btn { background: #e74c3c; padding: 5px 8px; font-size: 11px; width: auto; display: inline-block; margin: 0; }
-        .header-row { display: flex; justify-content: space-between; align-items: center; }
-        .time-badge { background: #eee; padding: 2px 5px; border-radius: 4px; font-size: 11px; color: #666; }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <div class="card">
-            <h3 style="margin:0; text-align: center;">⏱ Brew Timer</h3>
-            <div id="timer-display">00:00</div>
-            <div class="timer-controls">
-                <button id="startStopBtn" onclick="toggleTimer()">Start</button>
-                <button class="reset-btn" onclick="resetTimer()">Reset</button>
-            </div>
-        </div>
-
-        <div class="card">
-            <h2>☕ New Coffee Log</h2>
-            <input type="text" id="beanName" placeholder="Bean Name (e.g. Ethiopia)">
-            <select id="method">
-                <option value="V60">V60</option>
-                <option value="French Press">French Press</option>
-                <option value="Espresso">Espresso</option>
-            </select>
-            <input type="number" id="rating" placeholder="Rating (1-5)" min="1" max="5">
-            <button onclick="saveLog()">Save Brew & Time</button>
-        </div>
-
-        <div class="card">
-            <div class="header-row">
-                <h3>History</h3>
-                <button onclick="clearAll()" style="background: #95a5a6; padding: 5px; width: auto; font-size: 12px;">Clear All</button>
-            </div>
-            <div id="logList"></div>
-        </div>
-    </div>
-
-    <script>
-        let timerInterval;
-        let seconds = 0;
-        let isRunning = false;
-
-        function toggleTimer() {
-            const btn = document.getElementById('startStopBtn');
-            if (!isRunning) {
-                isRunning = true;
-                btn.innerText = "Stop";
-                btn.style.background = "#e67e22";
-                timerInterval = setInterval(() => {
-                    seconds++;
-                    updateTimerDisplay();
-                }, 1000);
-            } else {
-                isRunning = false;
-                btn.innerText = "Start";
-                btn.style.background = "#6f4e37";
-                clearInterval(timerInterval);
-            }
-        }
-
-        function resetTimer() {
-            isRunning = false;
-            clearInterval(timerInterval);
-            seconds = 0;
-            updateTimerDisplay();
-            document.getElementById('startStopBtn').innerText = "Start";
-            document.getElementById('startStopBtn').style.background = "#6f4e37";
-        }
-
-        function updateTimerDisplay() {
-            const mins = Math.floor(seconds / 60);
-            const secs = seconds % 60;
-            document.getElementById('timer-display').innerText = 
-                `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-        }
-
-        window.onload = function() { displayLogs(); };
-
-        function saveLog() {
-            const name = document.getElementById('beanName').value;
-            const method = document.getElementById('method').value;
-            const rating = document.getElementById('rating').value;
-            const brewTime = document.getElementById('timer-display').innerText;
-
-            if(!name || !rating) return alert("Please fill in fields");
-
-            const logs = JSON.parse(localStorage.getItem('coffeeLogs')) || [];
-            logs.push({ 
-                id: Date.now(), 
-                name, 
-                method, 
-                rating, 
-                brewTime: brewTime === "00:00" ? "N/A" : brewTime,
-                date: new Date().toLocaleDateString() 
-            });
-            localStorage.setItem('coffeeLogs', JSON.stringify(logs));
-
-            displayLogs();
-            document.getElementById('beanName').value = '';
-            document.getElementById('rating').value = '';
-            resetTimer(); // Clear timer after saving
-        }
-
-        function deleteLog(id) {
-            let logs = JSON.parse(localStorage.getItem('coffeeLogs')) || [];
-            logs = logs.filter(l => l.id !== id);
-            localStorage.setItem('coffeeLogs', JSON.stringify(logs));
-            displayLogs();
-        }
-
-        function clearAll() {
-            if(confirm("Clear all?")) { localStorage.removeItem('coffeeLogs'); displayLogs(); }
-        }
-
-        function displayLogs() {
-            const list = document.getElementById('logList');
-            const logs = JSON.parse(localStorage.getItem('coffeeLogs')) || [];
-            list.innerHTML = logs.length === 0 ? '<p>No brews yet.</p>' : ''; 
-            [...logs].reverse().forEach(log => {
-                const item = document.createElement('div');
-                item.className = 'log-item';
-                item.innerHTML = `
-                    <span>
-                        <strong>${log.name}</strong> (${log.method}) <span class="time-badge">⏱ ${log.brewTime}</span><br>
-                        <small style="color:gray;">${log.date}</small>
-                    </span> 
-                    <div style="text-align: right;">
-                        <span class="rating">${'★'.repeat(log.rating)}</span><br>
-                        <button class="delete-btn" onclick="deleteLog(${log.id})">Delete</button>
-                    </div>
-                `;
-                list.appendChild(item);
-            });
-        }
-    </script>
-</body>
-</html>
+        .card { background: var(--card-bg); padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.2); margin-bottom: 20px; }
