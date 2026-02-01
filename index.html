@@ -26,3 +26,131 @@
         body { font-family: sans-serif; padding: 20px; background: var(--bg-color); color: var(--text-color); transition: 0.3s; }
         .container { max-width: 400px; margin: auto; }
         .card { background: var(--card-bg); padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.2); margin-bottom: 20px; }
+        
+        input, select, button { display: block; width: 100%; margin: 10px 0; padding: 10px; box-sizing: border-box; border-radius: 4px; border: 1px solid var(--border-color); background: var(--card-bg); color: var(--text-color); }
+        
+        button { background: var(--accent-color); color: white; border: none; cursor: pointer; font-weight: bold; border: none; }
+        button:hover { opacity: 0.9; }
+        
+        #timer-display { font-size: 48px; font-weight: bold; text-align: center; margin: 10px 0; font-family: monospace; color: var(--accent-color); }
+        .timer-controls { display: flex; gap: 10px; }
+        .timer-controls button { flex: 1; }
+        
+        .log-item { padding: 10px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; }
+        .rating { color: #d4a017; font-weight: bold; }
+        .delete-btn { background: #e74c3c; padding: 5px 8px; font-size: 11px; width: auto; margin: 0; }
+        .time-badge { background: rgba(0,0,0,0.1); padding: 2px 5px; border-radius: 4px; font-size: 11px; color: var(--secondary-text); }
+        
+        .mode-toggle { background: none; color: var(--accent-color); border: 1px solid var(--accent-color); margin-bottom: 10px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <button class="mode-toggle" onclick="toggleTheme()">🌓 Toggle Dark Mode</button>
+
+        <div class="card">
+            <h3 style="margin:0; text-align: center;">⏱ Brew Timer</h3>
+            <div id="timer-display">00:00</div>
+            <div class="timer-controls">
+                <button id="startStopBtn" onclick="toggleTimer()">Start</button>
+                <button style="background:#95a5a6;" onclick="resetTimer()">Reset</button>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>☕ New Coffee Log</h2>
+            <input type="text" id="beanName" placeholder="Bean Name (e.g. Ethiopia)">
+            <select id="method">
+                <option value="V60">V60</option>
+                <option value="French Press">French Press</option>
+                <option value="Espresso">Espresso</option>
+            </select>
+            <input type="number" id="rating" placeholder="Rating (1-5)" min="1" max="5">
+            <button onclick="saveLog()">Save Brew & Time</button>
+        </div>
+
+        <div class="card">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <h3>History</h3>
+                <button onclick="clearAll()" style="background:#95a5a6; padding:5px; width:auto; font-size:11px;">Clear All</button>
+            </div>
+            <div id="logList"></div>
+        </div>
+    </div>
+
+    <script>
+        // --- Theme Logic ---
+        function toggleTheme() {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            const targetTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', targetTheme);
+            localStorage.setItem('theme', targetTheme);
+        }
+        
+        // Load preferred theme
+        if (localStorage.getItem('theme') === 'dark') {
+            document.documentElement.setAttribute('data-theme', 'dark');
+        }
+
+        // --- Timer Logic ---
+        let timerInterval, seconds = 0, isRunning = false;
+        function toggleTimer() {
+            const btn = document.getElementById('startStopBtn');
+            if (!isRunning) {
+                isRunning = true; btn.innerText = "Stop";
+                timerInterval = setInterval(() => { seconds++; updateTimerDisplay(); }, 1000);
+            } else {
+                isRunning = false; btn.innerText = "Start";
+                clearInterval(timerInterval);
+            }
+        }
+        function resetTimer() { isRunning = false; clearInterval(timerInterval); seconds = 0; updateTimerDisplay(); document.getElementById('startStopBtn').innerText = "Start"; }
+        function updateTimerDisplay() {
+            const mins = Math.floor(seconds / 60).toString().padStart(2, '0');
+            const secs = (seconds % 60).toString().padStart(2, '0');
+            document.getElementById('timer-display').innerText = `${mins}:${secs}`;
+        }
+
+        // --- Log Logic ---
+        window.onload = function() { displayLogs(); };
+
+        function saveLog() {
+            const name = document.getElementById('beanName').value;
+            const method = document.getElementById('method').value;
+            const rating = document.getElementById('rating').value;
+            const brewTime = document.getElementById('timer-display').innerText;
+
+            if(!name || !rating) return alert("Fill in fields!");
+
+            const logs = JSON.parse(localStorage.getItem('coffeeLogs')) || [];
+            logs.push({ id: Date.now(), name, method, rating, brewTime, date: new Date().toLocaleDateString() });
+            localStorage.setItem('coffeeLogs', JSON.stringify(logs));
+            displayLogs();
+            resetTimer();
+        }
+
+        function deleteLog(id) {
+            let logs = JSON.parse(localStorage.getItem('coffeeLogs')).filter(l => l.id !== id);
+            localStorage.setItem('coffeeLogs', JSON.stringify(logs));
+            displayLogs();
+        }
+
+        function clearAll() { if(confirm("Clear?")) { localStorage.removeItem('coffeeLogs'); displayLogs(); } }
+
+        function displayLogs() {
+            const list = document.getElementById('logList');
+            const logs = JSON.parse(localStorage.getItem('coffeeLogs')) || [];
+            list.innerHTML = logs.length === 0 ? '<p>No brews yet.</p>' : ''; 
+            [...logs].reverse().forEach(log => {
+                const item = document.createElement('div');
+                item.className = 'log-item';
+                item.innerHTML = `
+                    <span><strong>${log.name}</strong> (${log.method}) <span class="time-badge">⏱ ${log.brewTime}</span><br><small>${log.date}</small></span> 
+                    <div style="text-align: right;"><span class="rating">${'★'.repeat(log.rating)}</span><br><button class="delete-btn" onclick="deleteLog(${log.id})">Del</button></div>
+                `;
+                list.appendChild(item);
+            });
+        }
+    </script>
+</body>
+</html>
