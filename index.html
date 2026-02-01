@@ -1,70 +1,110 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BrewLog MVP</title>
     <style>
-        body { font-family: sans-serif; padding: 20px; background: #f4f1ea; }
-        .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); max-width: 400px; }
-        input, select, button { display: block; width: 100%; margin: 10px 0; padding: 10px; }
-        button { background: #6f4e37; color: white; border: none; cursor: pointer; }
+        body { font-family: sans-serif; padding: 20px; background: #f4f1ea; color: #333; }
+        .container { max-width: 400px; margin: auto; }
+        .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        input, select, button { display: block; width: 100%; margin: 10px 0; padding: 10px; box-sizing: border-box; }
+        button { background: #6f4e37; color: white; border: none; cursor: pointer; border-radius: 4px; }
+        button:hover { background: #5a3e2b; }
+        .log-item { background: #fff; padding: 10px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; }
+        .rating { color: #d4a017; font-weight: bold; }
+        .delete-btn { background: #e74c3c; padding: 5px 8px; font-size: 11px; width: auto; display: inline-block; margin: 0; }
+        .header-row { display: flex; justify-content: space-between; align-items: center; }
     </style>
 </head>
 <body>
-    <div class="card">
-        <h2>☕ New Coffee Log</h2>
-        <input type="text" id="beanName" placeholder="Bean Name (e.g. Ethiopia Yirgacheffe)">
-        <select id="method">
-            <option value="v60">V60</option>
-            <option value="french-press">French Press</option>
-            <option value="espresso">Espresso</option>
-        </select>
-        <button onclick="saveLog()">Save Brew</button>
+    <div class="container">
+        <div class="card">
+            <h2>☕ New Coffee Log</h2>
+            <input type="text" id="beanName" placeholder="Bean Name (e.g. Ethiopia)">
+            <select id="method">
+                <option value="V60">V60</option>
+                <option value="French Press">French Press</option>
+                <option value="Espresso">Espresso</option>
+            </select>
+            <input type="number" id="rating" placeholder="Rating (1-5)" min="1" max="5">
+            <button onclick="saveLog()">Save Brew</button>
+        </div>
+
+        <div class="card">
+            <div class="header-row">
+                <h3>History</h3>
+                <button onclick="clearAll()" style="background: #95a5a6; padding: 5px; width: auto; font-size: 12px;">Clear All</button>
+            </div>
+            <div id="logList"></div>
+        </div>
     </div>
 
     <script>
-        
-    // 1. Load existing logs from memory when the page opens
-    window.onload = function() {
-        displayLogs();
-    };
+        // Load logs when page opens
+        window.onload = function() { displayLogs(); };
 
-    function saveLog() {
-        const name = document.getElementById('beanName').value;
-        const method = document.getElementById('method').value;
-        const rating = document.getElementById('rating').value;
+        function saveLog() {
+            const name = document.getElementById('beanName').value;
+            const method = document.getElementById('method').value;
+            const rating = document.getElementById('rating').value;
 
-        if(!name || !rating) return alert("Please fill in all fields");
+            if(!name || !rating) return alert("Please enter a name and rating (1-5)");
 
-        const newLog = { name, method, rating, date: new Date().toLocaleDateString() };
+            const newLog = { 
+                id: Date.now(), // Unique ID for deleting
+                name, 
+                method, 
+                rating: parseInt(rating), 
+                date: new Date().toLocaleDateString() 
+            };
 
-        // 2. Get existing logs from LocalStorage, add new one, and save back
-        const logs = JSON.parse(localStorage.getItem('coffeeLogs')) || [];
-        logs.push(newLog);
-        localStorage.setItem('coffeeLogs', JSON.stringify(logs));
+            const logs = JSON.parse(localStorage.getItem('coffeeLogs')) || [];
+            logs.push(newLog);
+            localStorage.setItem('coffeeLogs', JSON.stringify(logs));
 
-        // 3. Update the UI and clear inputs
-        displayLogs();
-        document.getElementById('beanName').value = '';
-        document.getElementById('rating').value = '';
-    }
+            displayLogs();
+            document.getElementById('beanName').value = '';
+            document.getElementById('rating').value = '';
+        }
 
-    function displayLogs() {
-        const list = document.getElementById('logList');
-        const logs = JSON.parse(localStorage.getItem('coffeeLogs')) || [];
-        
-        // Clear current list and rebuild it from saved data
-        list.innerHTML = ''; 
-        logs.reverse().forEach(log => {
-            const item = document.createElement('div');
-            item.className = 'log-item';
-            item.innerHTML = `
-                <span><strong>${log.name}</strong> (${log.method}) <br><small>${log.date}</small></span> 
-                <span class="rating">${'★'.repeat(log.rating)}</span>
-            `;
-            list.appendChild(item);
-        });
-    }
+        function deleteLog(id) {
+            let logs = JSON.parse(localStorage.getItem('coffeeLogs')) || [];
+            logs = logs.filter(log => log.id !== id);
+            localStorage.setItem('coffeeLogs', JSON.stringify(logs));
+            displayLogs();
+        }
 
+        function clearAll() {
+            if(confirm("Delete all history?")) {
+                localStorage.removeItem('coffeeLogs');
+                displayLogs();
+            }
+        }
+
+        function displayLogs() {
+            const list = document.getElementById('logList');
+            const logs = JSON.parse(localStorage.getItem('coffeeLogs')) || [];
+            
+            list.innerHTML = logs.length === 0 ? '<p style="color:gray; font-size:14px;">No brews logged yet.</p>' : ''; 
+            
+            // Show newest logs at the top
+            [...logs].reverse().forEach(log => {
+                const item = document.createElement('div');
+                item.className = 'log-item';
+                item.innerHTML = `
+                    <span>
+                        <strong>${log.name}</strong> (${log.method})<br>
+                        <small style="color:gray;">${log.date}</small>
+                    </span> 
+                    <div style="text-align: right;">
+                        <span class="rating">${'★'.repeat(log.rating)}</span><br>
+                        <button class="delete-btn" onclick="deleteLog(${log.id})">Delete</button>
+                    </div>
+                `;
+                list.appendChild(item);
+            });
+        }
     </script>
 </body>
 </html>
