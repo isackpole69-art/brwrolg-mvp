@@ -61,21 +61,36 @@
             transform: translateY(-100%);
         }
 
+        .welcome-title {
+    font-size: 2rem; 
+    margin: 5px; 
+    text-shadow: 1px 1px 3px rgba(0,0,0,0.8); /* Inafanya maandishi yasomeke kirahisi juu ya picha */
+}
+
         .welcome-title { font-size: 2.5rem; margin: 10px; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); }
         .welcome-sub { font-size: 1.2rem; margin-bottom: 30px; opacity: 0.9; }
 
         .enter-btn {
-            background-color: var(--accent-gold);
-            color: white;
-            border: none;
-            padding: 15px 40px;
-            font-size: 1.2rem;
-            border-radius: 50px;
-            cursor: pointer;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-            font-weight: bold;
-            transition: 0.3s;
-        }
+    background-color: var(--accent-gold);
+    color: white;
+    border: none;
+    padding: 10px 25px; /* Nimepunguza upana na urefu hapa */
+    font-size: 1rem;    /* Nimepunguza ukubwa wa maandishi */
+    border-radius: 25px;
+    cursor: pointer;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    font-weight: bold;
+    transition: 0.3s;
+    margin-top: 15px;
+}
+
+/* Hii itakifanya kitufe kisionekane kikubwa sana kwenye simu */
+@media (max-width: 600px) {
+    .enter-btn {
+        width: auto; /* Kitufe hakitachukua upana wote wa kioo */
+        min-width: 150px;
+    }
+}
 
         .enter-btn:hover { background-color: var(--primary-coffee); transform: scale(1.05); }
 
@@ -198,14 +213,23 @@
 }
 
 function enterApp() {
-    const nameInput = document.getElementById('user-name-input').value;
+    let nameInput = document.getElementById('user-name-input').value;
     
-    // Kama mtumiaji ameandika jina jipya, lihifadhi
     if (nameInput) {
-        localStorage.setItem('brewUserName', nameInput);
+        // Hii sehemu inachukua jina kabla ya @ kama ni email
+        // Mfano: isackpole@gmail.com inakuwa isackpole
+        let firstName = nameInput.split('@')[0];
+        
+        // Pia tunahakikisha herufi ya kwanza ni KUBWA (Mfano: isack -> Isack)
+        firstName = firstName.charAt(0).toUpperCase() + firstName.slice(1);
+        
+        localStorage.setItem('brewUserName', firstName);
     }
     
     document.getElementById('splash-screen').classList.add('hidden');
+    
+    // Refresh salamu baada ya kuingia
+    setGreeting(); 
 }
 
         function toggleMode() {
@@ -264,6 +288,47 @@ function enterApp() {
         }
 
         window.onload = () => { setGreeting(); displayLogs(); };
+
+        // Hii inasikiliza kama umebonyeza Enter ukiwa kwenye input ya jina
+document.getElementById('user-name-input').addEventListener('keypress', function (e) {
+    if (e.key === 'Enter') {
+        // Zuia keyboard isifanye mambo mengine
+        e.preventDefault(); 
+        
+        // Ficha keyboard kwa kuondoa "focus" kwenye input
+        this.blur(); 
+        
+        // Iite function ya kuingia kwenye app
+        enterApp();
+    }
+});
+
+// Maboresho ya salamu baada ya kuingia
+function enterApp() {
+    let nameInput = document.getElementById('user-name-input').value;
+    
+    if (nameInput) {
+        let firstName = nameInput.split('@')[0];
+        firstName = firstName.charAt(0).toUpperCase() + firstName.slice(1);
+        localStorage.setItem('brewUserName', firstName);
+        
+        // Badilisha ujumbe wa Splash Screen kabla ya kupotea (kwa sekunde 1)
+        const hour = new Date().getHours();
+        let salamu = (hour < 12) ? "Habari za Asubuhi" : (hour < 16) ? "Habari za Mchana" : "Habari za Jioni";
+        
+        document.getElementById('greeting-text').innerText = `${salamu}, ${firstName}!`;
+        document.getElementById('welcome-sub').innerText = "Unakaribishwa kuanza kutumia BrewLog.";
+        document.getElementById('name-setup').style.display = "none";
+        
+        // Subiri nusu sekunde ili mtumiaji asome salamu yake, kisha ondoa splash screen
+        setTimeout(() => {
+            document.getElementById('splash-screen').classList.add('hidden');
+        }, 1200);
+    } else {
+        // Kama hajaandika kitu, iondoe tu splash screen
+        document.getElementById('splash-screen').classList.add('hidden');
+    }
+}
     </script>
 </body>
 </html>
