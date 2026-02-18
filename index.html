@@ -21,6 +21,24 @@
             overflow-x: hidden;
         }
 
+          /* Rangi za Dark Mode */
+[data-theme="dark"] {
+    --bg-light: #1a1a1a;
+    --text-dark: #fdfaf5;
+}
+
+[data-theme="dark"] .card {
+    background: #2d2d2d;
+    color: white;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+}
+
+[data-theme="dark"] input, [data-theme="dark"] select {
+    background: #3d3d3d;
+    color: white;
+    border: 1px solid #555;
+}
+
         /* 1. UKURASA WA KUKARIBISHA (SPLASH PAGE) */
         #splash-screen {
             position: fixed;
@@ -162,6 +180,15 @@
         function enterApp() {
             document.getElementById('splash-screen').classList.add('hidden');
         }
+
+        function toggleMode() {
+    const currentTheme = document.documentElement.getAttribute('data-theme');
+    if (currentTheme === 'dark') {
+        document.documentElement.setAttribute('data-theme', 'light');
+    } else {
+        document.documentElement.setAttribute('data-theme', 'dark');
+    }
+}
 
         // 2. LOGIC YA TIMER
         let timerInterval, seconds = 0, isRunning = false;
