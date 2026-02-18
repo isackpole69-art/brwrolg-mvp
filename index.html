@@ -129,8 +129,14 @@
 
     <div id="splash-screen">
         <h1 id="greeting-text" class="welcome-title">Habari!</h1>
-        <p class="welcome-sub">Karibu kwenye BrewLog Pro</p>
-        <button class="enter-btn" onclick="enterApp()">Anza Kutengeneza Kahawa</button>
+        
+        <div id="name-setup" style="display:none; margin-bottom: 20px;">
+            <input type="text" id="user-name-input" placeholder="Andika jina lako hapa..." 
+                   style="width: 80%; max-width: 300px; text-align: center;">
+        </div>
+        
+        <p class="welcome-sub" id="welcome-sub">Karibu kwenye BrewLog Pro</p>
+        <button class="enter-btn" onclick="enterApp()">Anza Kutumia BrewLog</button>
     </div>
 
     <div class="app-container">
@@ -169,17 +175,38 @@
     <script>
         // 1. SALAMU ZA KUKARIBISHA
         function setGreeting() {
-            const hour = new Date().getHours();
-            const gText = document.getElementById('greeting-text');
-            if (hour < 12) gText.innerText = "☕ Habari za Asubuhi!";
-            else if (hour < 16) gText.innerText = "☀️ Habari za Mchana!";
-            else if (hour < 21) gText.innerText = "🌆 Habari za Jioni!";
-            else gText.innerText = "🌙 Usiku Mwema!";
-        }
+    const hour = new Date().getHours();
+    const gText = document.getElementById('greeting-text');
+    const nameSetup = document.getElementById('name-setup');
+    
+    // Angalia kama jina lipo kwenye memory ya simu
+    let userName = localStorage.getItem('brewUserName');
+    
+    if (!userName) {
+        nameSetup.style.display = "block"; // Onyesha sehemu ya kuandika jina
+        userName = ""; 
+    }
 
-        function enterApp() {
-            document.getElementById('splash-screen').classList.add('hidden');
-        }
+    let salamu = "";
+    if (hour < 12) salamu = "☕ Habari za Asubuhi";
+    else if (hour < 16) salamu = "☀️ Habari za Mchana";
+    else if (hour < 21) salamu = "🌆 Habari za Jioni";
+    else salamu = "🌙 Usiku Mwema";
+
+    // Kama jina lipo, lionyeshe kwenye salamu
+    gText.innerText = userName ? `${salamu}, ${userName}!` : salamu + "!";
+}
+
+function enterApp() {
+    const nameInput = document.getElementById('user-name-input').value;
+    
+    // Kama mtumiaji ameandika jina jipya, lihifadhi
+    if (nameInput) {
+        localStorage.setItem('brewUserName', nameInput);
+    }
+    
+    document.getElementById('splash-screen').classList.add('hidden');
+}
 
         function toggleMode() {
     const currentTheme = document.documentElement.getAttribute('data-theme');
