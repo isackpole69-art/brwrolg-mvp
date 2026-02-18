@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BrewLog Pro</title>,
+    <title>BrewLog Pro</title>
     <style>
         /* MPANGILIO WA RANGI */
         :root {
@@ -21,16 +21,29 @@
             overflow-x: hidden;
         }
 
-        <link rel="manifest" href="manifest.json">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    
+        /* MPANGILIO WA RANGI ZA KAWAIDA */
+        :root {
+            --primary-coffee: #6f4e37;
+            --accent-gold: #d2a679;
+            --bg-light: #fdfaf5;
+            --text-dark: #2c1e14;
+        }
 
-          /* Rangi za Dark Mode */
-[data-theme="dark"] {
-    --bg-light: #1a1a1a;
-    --text-dark: #fdfaf5;
-}
+        /* RANGI ZA DARK MODE - Hapa ndipo CSS inakaa */
+        [data-theme="dark"] {
+            --bg-light: #1a1a1a;
+            --text-dark: #fdfaf5;
+        }
 
+        /* ... kodi zako zingine za CSS zinaendelea hapa ... */
+        body {
+            font-family: sans-serif;
+            background-color: var(--bg-light);
+            color: var(--text-dark);
+            margin: 0;
+        }
+    
 [data-theme="dark"] .card {
     background: #2d2d2d;
     color: white;
