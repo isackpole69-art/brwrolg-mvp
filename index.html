@@ -281,26 +281,48 @@ function enterApp() {
     const logs = JSON.parse(localStorage.getItem('coffeeLogs')) || [];
     
     if (logs.length === 0) {
-        list.innerHTML = "<p style='text-align:center; opacity:0.6;'>Bado huna kumbukumbu yoyote.</p>";
+        list.innerHTML = "<p style='text-align:center; opacity:0.5;'>Bado huna kumbukumbu.</p>";
         return;
     }
 
-    // Tunapanga logs ili mpya iwe juu, na kuongeza kitufe cha kufuta
-    list.innerHTML = logs.slice().reverse().map((l, index) => {
-        // Tunahitaji index ya asili kwa ajili ya kufuta
-        const originalIndex = logs.length - 1 - index; 
-        return `
-            <div class="log-item" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; padding: 10px 0;">
-                <span>
-                    <strong>${l.name}</strong> (${l.method})<br>
-                    <small>${l.date} | ⏱ ${l.time} | <span style="color:#d4a017">${'★'.repeat(l.rating)}</span></small>
-                </span>
-                <button onclick="deleteLog(${originalIndex})" style="background:none; border:none; color:#e74c3c; cursor:pointer; font-size: 1.2rem; width: auto; padding: 5px;">
+    // Tunasafisha orodha kwanza
+    list.innerHTML = "";
+
+    // Tunatengeneza orodha (tunaanza na ya mwisho kurudi ya kwanza)
+    for (let i = logs.length - 1; i >= 0; i--) {
+        const l = logs[i];
+        const logHtml = `
+            <div class="log-item" style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #eee; padding: 12px 0;">
+                <div>
+                    <strong>${l.name}</strong> <small>(${l.method})</small><br>
+                    <small>${l.date} | ⏱ ${l.time}</small><br>
+                    <span style="color:#d4a017; font-size:12px;">${'★'.repeat(l.rating)}</span>
+                </div>
+                <button onclick="deleteLog(${i})" style="background:none; border:none; color:#ff4d4d; cursor:pointer; font-size: 20px; width:40px; height:40px;">
                     🗑️
                 </button>
             </div>
         `;
-    }).join('');
+        list.innerHTML += logHtml;
+    }
+}
+
+function deleteLog(index) {
+    // Hii itatoa ujumbe wa uthibitisho
+    let confirmDelete = confirm("Je, una uhakika unataka kufuta rekodi hii?");
+    
+    if (confirmDelete) {
+        let logs = JSON.parse(localStorage.getItem('coffeeLogs')) || [];
+        
+        // Tunafuta rekodi husika
+        logs.splice(index, 1);
+        
+        // Tunahifadhi orodha mpya
+        localStorage.setItem('coffeeLogs', JSON.stringify(logs));
+        
+        // Tunaita displayLogs tena ili orodha isasishwe papo hapo
+        displayLogs();
+    }
 }
 
         window.onload = () => { setGreeting(); displayLogs(); };
