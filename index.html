@@ -1,162 +1,143 @@
 <!DOCTYPE html>
 <html lang="sw">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BrewLog Pro</title>
-    <style>
-        /* MPANGILIO WA RANGI */
-        :root {
-            --primary-coffee: #6f4e37;
-            --accent-gold: #d2a679;
-            --bg-light: #fdfaf5;
-            --text-dark: #2c1e14;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin: 0;
-            background-color: var(--bg-light);
-            color: var(--text-dark);
-            overflow-x: hidden;
-        }
-
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>BrewLog Pro</title>
     
-        /* MPANGILIO WA RANGI ZA KAWAIDA */
-        :root {
-            --primary-coffee: #6f4e37;
-            --accent-gold: #d2a679;
-            --bg-light: #fdfaf5;
-            --text-dark: #2c1e14;
-        }
-
-        /* RANGI ZA DARK MODE - Hapa ndipo CSS inakaa */
-        [data-theme="dark"] {
-            --bg-light: #1a1a1a;
-            --text-dark: #fdfaf5;
-        }
-
-        /* ... kodi zako zingine za CSS zinaendelea hapa ... */
-        body {
-            font-family: sans-serif;
-            background-color: var(--bg-light);
-            color: var(--text-dark);
-            margin: 0;
-        }
+        <link rel="manifest" href="manifest.json">
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     
-[data-theme="dark"] .card {
-    background: #2d2d2d;
-    color: white;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.3);
-}
-
-[data-theme="dark"] input, [data-theme="dark"] select {
-    background: #3d3d3d;
-    color: white;
-    border: 1px solid #555;
-}
-
-        /* 1. UKURASA WA KUKARIBISHA (SPLASH PAGE) */
-        #splash-screen {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), 
-                        url('https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&w=1200&q=80');
-            background-size: cover;
-            background-position: center;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            z-index: 9999;
-            transition: transform 0.8s ease-in-out;
-            color: white;
-            text-align: center;
-        }
-
-        #splash-screen.hidden {
-            transform: translateY(-100%);
-        }
-
-        .welcome-title {
-    font-size: 2rem; 
-    margin: 5px; 
-    text-shadow: 1px 1px 3px rgba(0,0,0,0.8); /* Inafanya maandishi yasomeke kirahisi juu ya picha */
-}
-
-        .welcome-title { font-size: 2.5rem; margin: 10px; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); }
-        .welcome-sub { font-size: 1.2rem; margin-bottom: 30px; opacity: 0.9; }
-
-        .enter-btn {
-    background-color: var(--accent-gold);
-    color: white;
-    border: none;
-    padding: 10px 25px; /* Nimepunguza upana na urefu hapa */
-    font-size: 1rem;    /* Nimepunguza ukubwa wa maandishi */
-    border-radius: 25px;
-    cursor: pointer;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-    font-weight: bold;
-    transition: 0.3s;
-    margin-top: 15px;
-}
-
-/* Hii itakifanya kitufe kisionekane kikubwa sana kwenye simu */
-@media (max-width: 600px) {
-    .enter-btn {
-        width: auto; /* Kitufe hakitachukua upana wote wa kioo */
-        min-width: 150px;
-    }
-}
-
-        .enter-btn:hover { background-color: var(--primary-coffee); transform: scale(1.05); }
-
-        /* 2. MUONEKANO WA APP */
-        .app-container {
-            max-width: 450px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-
-        .card {
-            background: white;
-            border-radius: 15px;
-            padding: 20px;
-            margin-bottom: 20px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-        }
-
-        #timer-display {
-            font-size: 3.5rem;
-            text-align: center;
-            font-family: monospace;
-            color: var(--primary-coffee);
-            margin: 20px 0;
-        }
-
-        .btn-group { display: flex; gap: 10px; }
-        button { flex: 1; padding: 12px; border-radius: 10px; border: none; font-weight: bold; cursor: pointer; }
-        .btn-main { background: var(--primary-coffee); color: white; }
-        .btn-outline { background: none; border: 2px solid var(--primary-coffee); color: var(--primary-coffee); }
-
-        input, select {
-            width: 100%;
-            padding: 12px;
-            margin: 10px 0;
-            border-radius: 8px;
-            border: 1px solid #ddd;
-            box-sizing: border-box;
-        }
-
-        .log-item {
-            border-bottom: 1px solid #eee;
-            padding: 15px 0;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-    </style>
-</head>
+        <style>
+            /* MPANGILIO WA RANGI (VARIABLES) */
+            :root {
+                --primary-coffee: #6f4e37;
+                --accent-gold: #d2a679;
+                --bg-light: #fdfaf5;
+                --text-dark: #2c1e14;
+            }
+    
+            /* MPANGILIO WA DARK MODE */
+            [data-theme="dark"] {
+                --bg-light: #1a1a1a;
+                --text-dark: #fdfaf5;
+            }
+    
+            [data-theme="dark"] .card {
+                background: #2d2d2d;
+                color: white;
+                box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            }
+    
+            [data-theme="dark"] input, [data-theme="dark"] select {
+                background: #3d3d3d;
+                color: white;
+                border: 1px solid #555;
+            }
+    
+            /* MUONEKANO WA MSINGI */
+            body {
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                margin: 0;
+                background-color: var(--bg-light);
+                color: var(--text-dark);
+                overflow-x: hidden;
+                padding-bottom: 20px; /* Nafasi ya chini */
+            }
+    
+            /* 1. UKURASA WA KUKARIBISHA (SPLASH PAGE) */
+            #splash-screen {
+                position: fixed;
+                top: 0; left: 0; width: 100%; height: 100%;
+                background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), 
+                            url('https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&w=1200&q=80');
+                background-size: cover;
+                background-position: center;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                z-index: 9999;
+                transition: transform 0.8s ease-in-out;
+                color: white;
+                text-align: center;
+            }
+    
+            #splash-screen.hidden {
+                transform: translateY(-100%);
+            }
+    
+            .welcome-title { 
+                font-size: 2.5rem; 
+                margin: 10px; 
+                text-shadow: 2px 2px 4px rgba(0,0,0,0.5); 
+            }
+    
+            .welcome-sub { font-size: 1.2rem; margin-bottom: 30px; opacity: 0.9; }
+    
+            /* KITUFE CHA KUINGIA (Sized correctly) */
+            .enter-btn {
+                background-color: var(--accent-gold);
+                color: white;
+                border: none;
+                padding: 12px 30px;
+                font-size: 1rem;
+                border-radius: 50px;
+                cursor: pointer;
+                box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+                font-weight: bold;
+                transition: 0.3s;
+            }
+    
+            .enter-btn:hover { background-color: var(--primary-coffee); transform: scale(1.05); }
+    
+            /* 2. MUONEKANO WA APP */
+            .app-container {
+                max-width: 450px;
+                margin: 0 auto;
+                padding: 20px;
+            }
+    
+            .card {
+                background: white;
+                border-radius: 15px;
+                padding: 20px;
+                margin-bottom: 20px;
+                box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            }
+    
+            #timer-display {
+                font-size: 3.5rem;
+                text-align: center;
+                font-family: monospace;
+                color: var(--primary-coffee);
+                margin: 20px 0;
+            }
+    
+            .btn-group { display: flex; gap: 10px; }
+            button { flex: 1; padding: 12px; border-radius: 10px; border: none; font-weight: bold; cursor: pointer; }
+            .btn-main { background: var(--primary-coffee); color: white; }
+            .btn-outline { background: none; border: 2px solid var(--primary-coffee); color: var(--primary-coffee); }
+    
+            input, select {
+                width: 100%;
+                padding: 12px;
+                margin: 10px 0;
+                border-radius: 8px;
+                border: 1px solid #ddd;
+                box-sizing: border-box;
+            }
+    
+            .log-item {
+                border-bottom: 1px solid #eee;
+                padding: 15px 0;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+        </style>
+    </head>
 <body>
 
     <div id="splash-screen">
